@@ -1,0 +1,12 @@
+INSERT INTO customers
+VALUES
+	),
+	),
+	),
+	),
+	),
+	),
+	),
+	),
+	),
+	);
