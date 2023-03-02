@@ -23,13 +23,14 @@ public class SqlGenerator {
         // Args 
         final String 
             inputOption = args[0],
-            tableName = args[2],
-            ouputFileName = args[1];
-
+            ouputFileName = args[1],
+            tableName = args[2];
         final int numberOfInserts = Integer.parseInt(args[3]);
 
-        final String[] COLUMNS_DATA_TYPE = Arrays.copyOfRange(args, OPTIONS, args.length - 1);
-        System.out.println(Arrays.toString(COLUMNS_DATA_TYPE));
+        final String[] COLUMNS_DATA_TYPE = 
+            Arrays.copyOfRange(args, OPTIONS, args.length);
+
+        System.out.println(Arrays.toString(COLUMNS_DATA_TYPE) + "\n" + Arrays.toString(args));
 
         File outputFile = new File(ouputFileName);
 
@@ -42,9 +43,7 @@ public class SqlGenerator {
                 StringBuilder builder = new StringBuilder("\t(");
 
                 for (int j = 0; j < COLUMNS_DATA_TYPE.length; j++) {
-
-                    switch (COLUMNS_DATA_TYPE[i]) {
-                        
+                    switch (COLUMNS_DATA_TYPE[j]) {
                         case NAME_DATA:
                             builder.append(appendColons(getName()));
                             break;
@@ -55,7 +54,7 @@ public class SqlGenerator {
                             builder.append(appendColons(getCountry()));
                             break;
                         case DOUBLE_DATA:
-                            builder.append(appendColons(String.format("%2.f", getRandomDouble(0, 10000000))));
+                            builder.append(appendColons(String.format("%.2f", getRandomDouble(0, 10000000))));
                             break;
                         case INTEGER_DATA:
                             builder.append(appendColons(getRandomInt(0, 1000)));
@@ -66,7 +65,7 @@ public class SqlGenerator {
                         default:
                             System.err.println("INVALID DATATYPE:" + COLUMNS_DATA_TYPE[i]  
                                 + "\nVALID ONES ARE name, surname, country, date, int and double");
-                            System.exit(0);
+                            System.exit(1);
                     } 
                 }
                 builder.deleteCharAt(builder.length() - 1);
