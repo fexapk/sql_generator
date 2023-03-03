@@ -20,6 +20,10 @@ public class SqlGenerator {
     // OPTIONS = index where column data types start
     static final int OPTIONS = 4;
     public static void main(String[] args) {
+        if (args.length < OPTIONS) {
+            System.out.println(HELP);
+            System.exit(0);
+        }
         // Args 
         final String 
             inputOption = args[0],
@@ -29,19 +33,15 @@ public class SqlGenerator {
 
         final String[] COLUMNS_DATA_TYPE = 
             Arrays.copyOfRange(args, OPTIONS, args.length);
-
-        System.out.println(Arrays.toString(COLUMNS_DATA_TYPE) + "\n" + Arrays.toString(args));
-
         File outputFile = new File(ouputFileName);
 
         try (BufferedWriter br = new BufferedWriter(new FileWriter(outputFile))) {
 
             br.write(getInsertCommand(tableName));
+            StringBuilder builder = new StringBuilder("");
 
             for (int i = 0; i < numberOfInserts; i++) {
-
-                StringBuilder builder = new StringBuilder("\t(");
-
+                builder.append("\t(");
                 for (int j = 0; j < COLUMNS_DATA_TYPE.length; j++) {
                     switch (COLUMNS_DATA_TYPE[j]) {
                         case NAME_DATA:
@@ -76,6 +76,7 @@ public class SqlGenerator {
                     builder.append(",\n");
                 
                 br.write(builder.toString());
+                builder.setLength(0);
             }
             System.out.println("\n\u001B[32mFile created succesfully!\u001B[0m");
         } catch (IOException ioe) {
@@ -135,133 +136,49 @@ public class SqlGenerator {
         return "INSERT INTO " + tableName + "\nVALUES\n";
     }
 
+    // Menu Strings
+
+    final static String HELP = 
+        "Usage: java SqlGenerator <option> [<args>]\n"
+      + "-d --default\t<output_file> <table_name> <number_of_values> [<columns>]\n"
+                  + "\t        default values affect the following data-types:\n" 
+                  + "\t\t        " + INTEGER_DATA + " from 0 to 1000\n"
+                  + "\t\t        " + DOUBLE_DATA + " from 0 to 1 000 000 with two decimal places\n"
+                  + "\t\t        " + DATE_DATA + "from the end of the WWII(1945) to the start of the second Gulf War(2003)\n"
+      + "-c --custom\tyet to be implemented";
+
     // Data arrays
 
-    static final String[] FIRSTNAMES = {"Mya",
-        "Peter",
-        "Uriah",
-        "Sonny",
-        "Marie",
-        "Danyelle",
-        "Ruby",
-        "Phoenix",
-        "Citlali",
-        "Ryland",
-        "Dashaun",
-        "Broderick",
-        "Weston",
-        "Tyrell",
-        "Edmund",
-        "Myron",
-        "Fernanda",
-        "Tate",
-        "Zain",
-        "Benjamin",
-        "Constance",
-        "Bruce",
-        "Zion",
-        "Miah",
-        "Keon",
-        "Riley",
-        "Caroline",
-        "Liliana",
-        "Ruth",
-        "Nallely",
-        "Vincenzo",
-        "Kai",
-        "Kayden",
-        "Alvaro",
-        "Travon",
-        "Owen",
-        "Haylee",
-        "Jaidyn",
-        "Holland",
-        "Peyton",
-        "Long",
-        "Franklin",
-        "Dasia",
-        "Ileana",
-        "Nikolas",
-        "Daria",
-        "Kalee",
-        "Arthur",
-        "Brylee",
-        "Sierra"};
+    static final String[] FIRSTNAMES = {"Mya","Peter","Uriah",
+        "Sonny","Marie","Danyelle",
+        "Ruby","Phoenix","Citlali",
+        "Ryland","Dashaun","Broderick","Weston","Tyrell",
+        "Edmund","Myron","Fernanda",
+        "Tate","Zain","Benjamin",
+        "Constance","Bruce","Zion","Miah","Keon","Riley",
+        "Caroline","Liliana","Ruth",
+        "Nallely","Vincenzo","Kai",
+        "Kayden","Alvaro","Travon",
+        "Owen","Haylee","Jaidyn",
+        "Holland","Peyton","Long",
+        "Franklin","Dasia","Ileana",
+        "Nikolas","Daria","Kalee","Arthur","Brylee","Sierra"};
 
-    static final String[] SURNAMES = {"Hudgins",
-        "Stockton",
-        "Cochrane",
-        "Granger",
-        "Stuckey",
-        "Bowles",
-        "Metcalf",
-        "Connor",
-        "Fisher",
-        "Haddad",
-        "Geiger",
-        "Lloyd",
-        "Strickland",
-        "Shipp",
-        "Faulkner",
-        "Beasley",
-        "Mercer",
-        "Hadley",
-        "Downey",
-        "Conti",
-        "Shapiro",
-        "Derrick",
-        "Lozano",
-        "Garibay",
-        "Burden",
-        "Taft",
-        "Hand",
-        "Kirk",
-        "Switzer",
-        "Ragland",
-        "McFadden",
-        "Hester",
-        "Hirsch",
-        "Cady",
-        "Hillman",
-        "Foss",
-        "Carver",
-        "Estes",
-        "Mancuso",
-        "Troutman",
-        "Levy",
-        "Ramos",
-        "Wisniewski",
-        "Wozniak",
-        "Plummer",
-        "Pope",
-        "Lewis",
-        "Kinder",
-        "Trout",
-        "Eller"};
+    static final String[] SURNAMES = {"Hudgins","Stockton","Cochrane",
+        "Granger","Stuckey","Bowles",
+        "Metcalf","Connor","Fisher","Haddad","Geiger",
+        "Lloyd","Strickland","Shipp","Faulkner","Beasley",
+        "Mercer","Hadley","Downey","Conti","Shapiro","Derrick",
+        "Lozano","Garibay","Burden","Taft","Hand","Kirk","Switzer",
+        "Ragland","McFadden","Hester","Hirsch","Cady","Hillman","Foss",
+        "Carver","Estes","Mancuso","Troutman","Levy","Ramos","Wisniewski",
+        "Wozniak","Plummer","Pope","Lewis","Kinder","Trout","Eller"};
 
-    static final String[] COUNTRIES = {"Seychelles",
-	   "Rwanda",
-	   "Saint Lucia",
-	   "Tajikistan",
-	   "Trinidad and Tobago",
-	   "New Caledonia",
-	   "Cook Islands",
-	   "Bermuda",
-	   "Burkina Faso",
-	   "Colombia",
-	   "Dominica",
-	   "Brazil",
-	   "Belarus",
-	   "Australia",
-	   "U.S. Virgin Islands",
-	   "Faroe Islands",
-	   "Costa Rica",
-	   "Macao",
-	   "Saint Kitts and Nevis",
-	   "Bhutan",
-	   "Eritrea",
-	   "Iceland",
-	   "Jersey",
-	   "Thailand",
-	   "Hungary"};
+    static final String[] COUNTRIES = {"Seychelles","Rwanda","Saint Lucia",
+        "Tajikistan","Trinidad and Tobago","New Caledonia",
+        "Cook Islands","Bermuda","Burkina Faso",
+        "Colombia","Dominica","Brazil","Belarus",
+        "Australia","U.S. Virgin Islands","Faroe Islands",
+        "Costa Rica","Macao","Saint Kitts and Nevis","Bhutan",
+        "Eritrea","Iceland","Jersey","Thailand","Hungary"};
 }   
