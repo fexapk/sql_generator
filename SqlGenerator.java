@@ -92,6 +92,11 @@ public class SqlGenerator {
         return ThreadLocalRandom.current().nextDouble(max - min) + min;
     }
 
+    public static String getFormatedString(char decimalPlaces, double n) {
+        String formater = "%." + decimalPlaces + "f";
+        return String.format(formater, n);
+    }
+
     public static String getName() {
         return FIRSTNAMES[getRandomInt(0, FIRSTNAMES.length - 1)];
     }
