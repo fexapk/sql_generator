@@ -41,10 +41,14 @@ public class SqlGenerator {
             br.write(getInsertCommand(tableName));
             StringBuilder builder = new StringBuilder("");
 
-            final int MIN_INT = 0, MAX_INT = 1000,
-                      MIN_DOUBLE = 0, MAX_DOUBLE = 1000000,
-                      START_YEAR = 1945, END_YEAR = 2003;
-            final char N_DECIMALS = '2';
+            final int 
+                MIN_INT = 0, 
+                MAX_INT = 1000,
+                MIN_DOUBLE = 0, 
+                MAX_DOUBLE = 1000000,
+                START_YEAR = 1945, 
+                END_YEAR = 2003,
+                N_DECIMALS = 2;
 
             for (int i = 0; i < numberOfInserts; i++) {
                 builder.append("\t(");
@@ -99,7 +103,7 @@ public class SqlGenerator {
         return ThreadLocalRandom.current().nextDouble(max - min) + min;
     }
 
-    public static String getFormatedDouble(char decimalPlaces, double n) {
+    public static String getFormatedDouble(int decimalPlaces, double n) {
         String formater = "%." + decimalPlaces + "f";
         return String.format(formater, n);
     }
