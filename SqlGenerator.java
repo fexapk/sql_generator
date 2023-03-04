@@ -92,7 +92,7 @@ public class SqlGenerator {
         return ThreadLocalRandom.current().nextDouble(max - min) + min;
     }
 
-    public static String getFormatedString(char decimalPlaces, double n) {
+    public static String getFormatedDouble(char decimalPlaces, double n) {
         String formater = "%." + decimalPlaces + "f";
         return String.format(formater, n);
     }
