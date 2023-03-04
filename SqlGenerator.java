@@ -2,8 +2,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.GregorianCalendar;
 import java.util.Arrays;
@@ -17,8 +15,12 @@ public class SqlGenerator {
         DOUBLE_DATA = "double",
         INTEGER_DATA = "int",
         DATE_DATA = "date";
+    static final String[] dataTypes = 
+        {NAME_DATA, SURNAME_DATA, 
+         COUNTRY_DATA, DOUBLE_DATA, 
+         INTEGER_DATA, DATE_DATA};
     // OPTIONS = index where column data types start
-    static final int OPTIONS = 4;
+    static final int OPTIONS = 3;
     public static void main(String[] args) {
         if (args.length < OPTIONS) {
             System.out.println(HELP);
@@ -26,10 +28,9 @@ public class SqlGenerator {
         }
         // Args 
         final String 
-            inputOption = args[0],
-            ouputFileName = args[1],
-            tableName = args[2];
-        final int numberOfInserts = Integer.parseInt(args[3]);
+            ouputFileName = args[0],
+            tableName = args[1];
+        final int numberOfInserts = Integer.parseInt(args[2]);
 
         final String[] COLUMNS_DATA_TYPE = 
             Arrays.copyOfRange(args, OPTIONS, args.length);
@@ -39,6 +40,11 @@ public class SqlGenerator {
 
             br.write(getInsertCommand(tableName));
             StringBuilder builder = new StringBuilder("");
+
+            final int MIN_INT = 0, MAX_INT = 1000,
+                      MIN_DOUBLE = 0, MAX_DOUBLE = 1000000,
+                      START_YEAR = 1945, END_YEAR = 2003;
+            final char N_DECIMALS = '2';
 
             for (int i = 0; i < numberOfInserts; i++) {
                 builder.append("\t(");
@@ -54,17 +60,18 @@ public class SqlGenerator {
                             builder.append(appendColons(getCountry()));
                             break;
                         case DOUBLE_DATA:
-                            builder.append(appendColons(String.format("%.2f", getRandomDouble(0, 10000000))));
+                            double n = getRandomDouble(MIN_DOUBLE, MAX_DOUBLE);
+                            builder.append(appendColons(getFormatedDouble(N_DECIMALS, n)));
                             break;
                         case INTEGER_DATA:
-                            builder.append(appendColons(getRandomInt(0, 1000)));
+                            builder.append(appendColons(getRandomInt(MIN_INT, MAX_INT)));
                             break;
                         case DATE_DATA:
-                            builder.append(appendColons(getRandomDate(1945, 2003)));
+                            builder.append(appendColons(getRandomDate(START_YEAR, END_YEAR)));
                             break;
                         default:
-                            System.err.println("INVALID DATATYPE:" + COLUMNS_DATA_TYPE[i]  
-                                + "\nVALID ONES ARE name, surname, country, date, int and double");
+                            System.err.println("INVALID DATATYPE " + COLUMNS_DATA_TYPE[j]  
+                                + "\nVALID ONES " + Arrays.toString(dataTypes));
                             System.exit(1);
                     } 
                 }
@@ -145,12 +152,11 @@ public class SqlGenerator {
 
     final static String HELP = 
         "Usage: java SqlGenerator <option> [<args>]\n"
-      + "-d --default\t<output_file> <table_name> <number_of_values> [<columns>]\n"
+      + "SqlGenerator\t<output_file> <table_name> <number_of_values> [<columns>]\n"
                   + "\t        default values affect the following data-types:\n" 
                   + "\t\t        " + INTEGER_DATA + " from 0 to 1000\n"
                   + "\t\t        " + DOUBLE_DATA + " from 0 to 1 000 000 with two decimal places\n"
-                  + "\t\t        " + DATE_DATA + "from the end of the WWII(1945) to the start of the second Gulf War(2003)\n"
-      + "-c --custom\tyet to be implemented";
+                  + "\t\t        " + DATE_DATA + "from the end of the WWII(1945) to the start of the second Gulf War(2003)\n";
 
     // Data arrays
 
