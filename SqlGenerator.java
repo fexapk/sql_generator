@@ -155,12 +155,12 @@ public class SqlGenerator {
     // Menu Strings
 
     final static String HELP = 
-        "Usage: java SqlGenerator <option> [<args>]\n"
+        "Usage: java SqlGenerator [<args>]\n"
       + "SqlGenerator\t<output_file> <table_name> <number_of_values> [<columns>]\n"
                   + "\t        default values affect the following data-types:\n" 
                   + "\t\t        " + INTEGER_DATA + " from 0 to 1000\n"
                   + "\t\t        " + DOUBLE_DATA + " from 0 to 1 000 000 with two decimal places\n"
-                  + "\t\t        " + DATE_DATA + "from the end of the WWII(1945) to the start of the second Gulf War(2003)\n";
+                  + "\t\t        " + DATE_DATA + " from the end of the WWII (1945) to the start of the second Gulf War (2003)\n";
 
     // Data arrays
 
