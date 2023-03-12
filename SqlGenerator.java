@@ -1,10 +1,14 @@
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
+
 import java.util.GregorianCalendar;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class SqlGenerator {
 
@@ -14,12 +18,16 @@ public class SqlGenerator {
         COUNTRY_DATA = "country",
         DOUBLE_DATA = "double",
         INTEGER_DATA = "int",
-        DATE_DATA = "date";
+        DATE_DATA = "date",
+        ID = "id",
+        DNI = "dni";
+
     static final String[] dataTypes = 
         {NAME_DATA, SURNAME_DATA, 
          COUNTRY_DATA, DOUBLE_DATA, 
-         INTEGER_DATA, DATE_DATA};
-    // OPTIONS = index where column data types start
+         INTEGER_DATA, DATE_DATA,
+         ID,DNI};
+    // OPTIONS is also the index where options stop
     static final int OPTIONS = 3;
     public static void main(String[] args) {
         if (args.length < OPTIONS) {
@@ -34,45 +42,77 @@ public class SqlGenerator {
 
         final String[] COLUMNS_DATA_TYPE = 
             Arrays.copyOfRange(args, OPTIONS, args.length);
-        File outputFile = new File(ouputFileName);
 
+        File outputFile = new File(ouputFileName);
         try (BufferedWriter br = new BufferedWriter(new FileWriter(outputFile))) {
 
             br.write(getInsertCommand(tableName));
             StringBuilder builder = new StringBuilder("");
+            Scanner scan = new Scanner(System.in);
 
-            final int 
-                MIN_INT = 0, 
-                MAX_INT = 1000,
-                MIN_DOUBLE = 0, 
-                MAX_DOUBLE = 1000000,
-                START_YEAR = 1945, 
-                END_YEAR = 2003,
-                N_DECIMALS = 2;
+            System.out.println("Default values:\n" + DEFAULT_VALUES);
+
+            char userChoice = getChar(scan, "Would you like to use custom values? (y/n)");
+
+             int
+                 MIN_INT = 0, 
+                 MAX_INT = 1000,
+                 MIN_DOUBLE = 0, 
+                 MAX_DOUBLE = 1000000,
+                 START_YEAR = 1945, 
+                 END_YEAR = 2003,
+                 N_DECIMALS = 2;
+
+           switch (userChoice) {
+                case 'y':
+                    MIN_INT = getInt(scan, "Min Integer");
+                    MAX_INT = getInt(scan, "Max Integer");
+                    MIN_DOUBLE = getInt(scan, "Min Double"); 
+                    MAX_DOUBLE = getInt(scan, "Max Double");
+                    START_YEAR = getUnsignedInt(scan, "Start Year"); 
+                    END_YEAR = getUnsignedInt(scan, "End Year");
+                    N_DECIMALS = getUnsignedInt(scan, "Number of Decimal places");
+                    break;
+                default:
+                    System.out.println("Default values will be used");
+           }
 
             for (int i = 0; i < numberOfInserts; i++) {
                 builder.append("\t(");
                 for (int j = 0; j < COLUMNS_DATA_TYPE.length; j++) {
                     switch (COLUMNS_DATA_TYPE[j]) {
                         case NAME_DATA:
-                            builder.append(appendColons(getName()));
+                            String name = getName();
+                            builder.append(appendColons(name));
                             break;
                         case SURNAME_DATA:
-                            builder.append(appendColons(getSurname()));
+                            String surname = getSurname();
+                            builder.append(appendColons(surname));
                             break;
                         case COUNTRY_DATA:
-                            builder.append(appendColons(getCountry()));
+                            String country = getCountry();
+                            builder.append(appendColons(country));
                             break;
                         case DOUBLE_DATA:
-                            double n = getRandomDouble(MIN_DOUBLE, MAX_DOUBLE);
-                            builder.append(appendColons(getFormatedDouble(N_DECIMALS, n)));
+                            double decimalNumber = getRandomDouble(MIN_DOUBLE, MAX_DOUBLE);
+                            String formatedDecimal = getFormatedDouble(N_DECIMALS, decimalNumber);
+                            builder.append(appendColons(formatedDecimal));
                             break;
                         case INTEGER_DATA:
-                            builder.append(appendColons(getRandomInt(MIN_INT, MAX_INT)));
+                            int number = getRandomInt(MIN_INT, MAX_INT);
+                            builder.append(appendColons(number));
                             break;
                         case DATE_DATA:
-                            builder.append(appendColons(getRandomDate(START_YEAR, END_YEAR)));
+                            String date = getRandomDate(START_YEAR, END_YEAR);
+                            builder.append(appendColons(date));
                             break;
+                        case ID:
+                           builder.append(appendColons(i));
+                           break;
+                        case DNI:
+                           String dni = generateVerifiedDni();
+                           builder.append(appendColons(dni));
+                           break;
                         default:
                             System.err.println("INVALID DATATYPE " + COLUMNS_DATA_TYPE[j]  
                                 + "\nVALID ONES " + Arrays.toString(dataTypes));
@@ -96,7 +136,7 @@ public class SqlGenerator {
     }
 
     public static int getRandomInt(int min, int max) {
-        return ThreadLocalRandom.current().nextInt(max - min) + min;
+        return ThreadLocalRandom.current().nextInt(max + 1 - min) + min;
     }
     
     public static double getRandomDouble(int min, int max) {
@@ -152,15 +192,99 @@ public class SqlGenerator {
         return "INSERT INTO " + tableName + "\nVALUES\n";
     }
 
-    // Menu Strings
+    static char getChar (Scanner scan, String text) {
+        System.out.print(text + " > ");
+        return scan.next().charAt(0);
+    }
+
+    static int getInt (Scanner scan, String text) {
+        while (true) {
+            System.out.print(text + " > ");
+            if (!scan.hasNextInt()) {
+                scan.nextLine();
+                System.out.println("Has to be a Number");
+                continue;
+            }
+            break;
+        }        
+        return scan.nextInt();
+    }
+
+    static int getUnsignedInt(Scanner scan, String text) {
+        int n = 1;
+        while (true) {
+            n = getInt(scan, text);
+            if (n < 0) {
+                System.out.println("Number has to be positive");
+                    continue;
+            }
+            break;
+        }
+        return n;
+    }
+
+    /**
+     * Genera Dni de acuerdo al ultimo char de verificacion
+     * @return
+     */
+    public static String generateVerifiedDni() {
+        String numberChain = generateNumberChain();
+        numberChain += generateVerifChar(Long.parseLong(numberChain));
+        if (numberChain.charAt(numberChain.length()-1) == '1') {
+            System.err.println("Secuencia de numeros mal generada");
+            return null;
+        }
+        return numberChain;
+    }
+
+    /**
+     * generates a pseudo-random DNI number chain of numbers
+     * @return
+     */
+    public static String generateNumberChain() {
+        String dni = "";
+        Random rand = new Random();
+        
+        int numerosDni = 7;
+        for (int i = 0; i < numerosDni; i++) {
+            dni += rand.nextInt(9 - 1) + 1;
+        }
+        return dni;
+    }
+
+    /**
+     * Devuelve el char de verificacion del DNI
+     * @param secuenciaDni (long) siete cirfras
+     * @return '1' si el long no es de siete cifras
+     */
+    public static char generateVerifChar(long secuenciaDni) {
+        int resto = (int) secuenciaDni%23;
+        if (resto >=0 && resto <= 22) {
+            return SECUENCIA_23[resto];
+        }
+        System.out.println("Numero DNI tiene que contener 7 digitos");
+        return '1';
+    }
+
+    public static final char[] SECUENCIA_23 = {'T', 'R', 'W', 'A', 'G', 'M', 'Y',
+         'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H', 'L',
+         'C', 'K', 'E'};
+
+    // Strings
 
     final static String HELP = 
-        "Usage: java SqlGenerator [<args>]\n"
-      + "SqlGenerator\t<output_file> <table_name> <number_of_values> [<columns>]\n"
-                  + "\t        default values affect the following data-types:\n" 
+        "Usage: java SqlGenerator <option> [<args>]\n"
+      + "SqlGenerator\t<output_file> <table_name> <number_of_values> [<types>]\n"
+                  + "\t        default values affect the following data-types\n" 
                   + "\t\t        " + INTEGER_DATA + " from 0 to 1000\n"
                   + "\t\t        " + DOUBLE_DATA + " from 0 to 1 000 000 with two decimal places\n"
-                  + "\t\t        " + DATE_DATA + " from the end of the WWII (1945) to the start of the second Gulf War (2003)\n";
+                  + "\t\t        " + DATE_DATA + "from the end of the WWII(1945) to the start of the second Gulf War(2003)\n"
+                  +"Types\t" + Arrays.toString(dataTypes) + '\n'
+                  + "Example : \tSqlGenerator inserts.sql customers 200 name surname date double int";
+    final static String DEFAULT_VALUES = 
+        INTEGER_DATA + " from 0 to 1000\n"
+            + DOUBLE_DATA + " from 0 to 1 000 000 with two decimal places\n"
+            + DATE_DATA + " from the end of the WWII (1945) to the start of the second Gulf War (2003)\n";
 
     // Data arrays
 
